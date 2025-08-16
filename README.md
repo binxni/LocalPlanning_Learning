@@ -16,6 +16,21 @@ torch.jit.trace(Dummy(), torch.zeros(1)).save('models/mobilenet_dummy.pt')
 PY
 ```
 
+## Train
+
+Prepare a dataset saved as an `.npz` file containing arrays `laser`,
+`global_wp` and `local_wp`. Each sample should stack one 1081-element
+laser scan with a corresponding global waypoint track to form a
+two-channel input. `local_wp` should contain the target 20 waypoints
+with `(x, y, yaw, v)` for each step.
+
+Train the MobileNetV2-based planner and export a TorchScript model with:
+
+```bash
+python scripts/train_mobilenet.py path/to/data.npz --epochs 5 --out models/mobilenet_trained.pt
+```
+
+
 ## Build
 
 ```bash
