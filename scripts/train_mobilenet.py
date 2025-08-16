@@ -6,7 +6,7 @@ import numpy as np
 import torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
-from torchvision.models import mobilenet_v2
+from models.mobilenet_v2_1d import PlannerMobileNet1D
 
 
 class WaypointDataset(Dataset):
@@ -32,27 +32,6 @@ class WaypointDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         return self.inputs[idx], self.targets[idx]
-
-
-class PlannerMobileNet(nn.Module):
-    """MobileNetV2 backbone adjusted for 1D planner inputs."""
-
-    def __init__(self) -> None:
-        super().__init__()
-        self.backbone = mobilenet_v2(weights=None)
-        # Replace first convolution: 2 input channels, 1x1 kernel, stride 1
-        self.backbone.features[0][0] = nn.Conv2d(
-            2, 32, kernel_size=1, stride=1, padding=0, bias=False
-        )
-        # Replace classifier to output 80 values (20 waypoints * 4 features)
-        self.backbone.classifier[1] = nn.Linear(self.backbone.last_channel, 80)
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # x shape: (B, 2, 1081)
-        x = x.unsqueeze(-1)  # -> (B, 2, 1081, 1)
-        x = self.backbone(x)
-        return x.view(-1, 20, 4)
-
 
 def train(model: nn.Module, loader: DataLoader, epochs: int, lr: float) -> None:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -85,7 +64,7 @@ def main() -> None:
 
     dataset = WaypointDataset(args.data)
     loader = DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
-    model = PlannerMobileNet()
+    model = PlannerMobileNet1D()
     train(model, loader, epochs=args.epochs, lr=args.lr)
     example = torch.zeros(1, 2, 1081)
     traced = torch.jit.trace(model.cpu(), example)
