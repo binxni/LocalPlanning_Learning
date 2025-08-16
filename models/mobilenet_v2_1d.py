@@ -155,11 +155,29 @@ class PlannerMobileNet1D(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.backbone = MobileNetV2Backbone1D()
-        self.classifier = nn.Linear(self.backbone.last_channel, 80)
+        hidden = 256
+        # Multi-head structure for separate predictions
+        self.xy_head = nn.Sequential(
+            nn.Linear(self.backbone.last_channel, hidden),
+            nn.ReLU(inplace=True),
+            nn.Linear(hidden, 40),
+        )
+        self.yaw_head = nn.Sequential(
+            nn.Linear(self.backbone.last_channel, hidden),
+            nn.ReLU(inplace=True),
+            nn.Linear(hidden, 20),
+        )
+        self.vel_head = nn.Sequential(
+            nn.Linear(self.backbone.last_channel, hidden),
+            nn.ReLU(inplace=True),
+            nn.Linear(hidden, 20),
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.backbone(x)
         x = x.flatten(1)
-        x = self.classifier(x)
-        return x.view(-1, 20, 4)
+        xy = self.xy_head(x).view(-1, 20, 2)
+        yaw = self.yaw_head(x).view(-1, 20, 1)
+        vel = self.vel_head(x).view(-1, 20, 1)
+        return torch.cat((xy, yaw, vel), dim=2)
 
