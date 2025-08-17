@@ -150,7 +150,7 @@ class MobileNetV2Backbone1D(nn.Module):
 
 
 class PlannerMobileNet1D(nn.Module):
-    """Full 1D MobileNetV2 model for predicting 20 waypoints."""
+    """Full 1D MobileNetV2 model for predicting 16 waypoints."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -160,24 +160,24 @@ class PlannerMobileNet1D(nn.Module):
         self.xy_head = nn.Sequential(
             nn.Linear(self.backbone.last_channel, hidden),
             nn.ReLU(inplace=True),
-            nn.Linear(hidden, 40),
+            nn.Linear(hidden, 32),
         )
         self.yaw_head = nn.Sequential(
             nn.Linear(self.backbone.last_channel, hidden),
             nn.ReLU(inplace=True),
-            nn.Linear(hidden, 20),
+            nn.Linear(hidden, 16),
         )
         self.vel_head = nn.Sequential(
             nn.Linear(self.backbone.last_channel, hidden),
             nn.ReLU(inplace=True),
-            nn.Linear(hidden, 20),
+            nn.Linear(hidden, 16),
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.backbone(x)
         x = x.flatten(1)
-        xy = self.xy_head(x).view(-1, 20, 2)
-        yaw = self.yaw_head(x).view(-1, 20, 1)
-        vel = self.vel_head(x).view(-1, 20, 1)
+        xy = self.xy_head(x).view(-1, 16, 2)
+        yaw = self.yaw_head(x).view(-1, 16, 1)
+        vel = self.vel_head(x).view(-1, 16, 1)
         return torch.cat((xy, yaw, vel), dim=2)
 
