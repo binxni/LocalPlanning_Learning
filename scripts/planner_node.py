@@ -14,7 +14,7 @@ class PlannerNode(Node):
         super().__init__('planner_node')
         self.declare_parameters('', [
             ('model_path', 'models/mobilenet_dummy.pt'),
-            ('horizon', 20),
+            ('horizon', 16),
             ('speed', 1.0),
             ('steering_angle', 0.0),
         ])

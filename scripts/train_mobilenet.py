@@ -15,7 +15,7 @@ class WaypointDataset(Dataset):
     Expects an ``.npz`` file with arrays ``laser``, ``global_wp`` and
     ``local_wp``. ``laser`` and ``global_wp`` should have shape ``(N, 1081)``
     and will be stacked to form the 2-channel input. ``local_wp`` should have
-    shape ``(N, 20, 4)`` representing ``x, y, yaw`` and ``v`` for each step in
+    shape ``(N, 16, 4)`` representing ``x, y, yaw`` and ``v`` for each step in
     the horizon.
     """
 

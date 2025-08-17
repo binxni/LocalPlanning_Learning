@@ -11,7 +11,7 @@ python - <<'PY'
 import torch
 class Dummy(torch.nn.Module):
     def forward(self, x):
-        return torch.zeros(20,4)
+        return torch.zeros(16,4)
 torch.jit.trace(Dummy(), torch.zeros(1)).save('models/mobilenet_dummy.pt')
 PY
 ```
@@ -21,7 +21,7 @@ PY
 Prepare a dataset saved as an `.npz` file containing arrays `laser`,
 `global_wp` and `local_wp`. Each sample should stack one 1081-element
 laser scan with a corresponding global waypoint track to form a
-two-channel input. `local_wp` should contain the target 20 waypoints
+two-channel input. `local_wp` should contain the target 16 waypoints
 with `(x, y, yaw, v)` for each step.
 
 Train the MobileNetV2-based planner and export a TorchScript model with:
